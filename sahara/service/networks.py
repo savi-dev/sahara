@@ -98,3 +98,6 @@ def delete_floating_ip(instance_id):
     fl_ips = nova.client().floating_ips.findall(instance_id=instance_id)
     for fl_ip in fl_ips:
         nova.client().floating_ips.delete(fl_ip.id)
+
+def list_networks(**kwargs):
+    return neutron.client().list_networks(**kwargs)['networks']
