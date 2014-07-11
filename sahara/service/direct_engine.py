@@ -233,7 +233,8 @@ class DirectEngine(e.Engine):
             nova_instance = nova.client().servers.create(
                 name, node_group.get_image_id(), node_group.flavor_id,
                 scheduler_hints=hints, userdata=userdata,
-                key_name=cluster.user_keypair_id)
+                key_name=cluster.user_keypair_id,
+                nics=self._get_default_network())
 
         instance_id = conductor.instance_add(ctx, node_group,
                                              {"instance_id": nova_instance.id,
@@ -253,6 +254,12 @@ class DirectEngine(e.Engine):
             if node_group.floating_ip_pool:
                 networks.assign_floating_ip(instance.instance_id,
                                             node_group.floating_ip_pool)
+
+    def _get_default_network(self):
+        ctx = context.ctx()
+        name = ctx.tenant_name + "-net"
+        network = networks.list_networks(name=name)[0]
+        return [{"net-id": network["id"]}]
 
     def _await_active(self, cluster, instances):
         """Await all instances are in Active status and available."""

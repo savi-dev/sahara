@@ -43,10 +43,15 @@ def init_instances_ips(instance):
 
     for network_label, addresses in six.iteritems(server.addresses):
         for address in addresses:
-            if address['OS-EXT-IPS:type'] == 'fixed':
-                internal_ip = internal_ip or address['addr']
+            if 'OS-EXT-IPS:type' in address:
+                if address['OS-EXT-IPS:type'] == 'fixed':
+                    internal_ip = internal_ip or address['addr']
+                else:
+                    management_ip = management_ip or address['addr']
             else:
+                internal_ip = internal_ip or address['addr']
                 management_ip = management_ip or address['addr']
+
 
     if not CONF.use_floating_ips:
         management_ip = internal_ip
@@ -93,3 +98,6 @@ def delete_floating_ip(instance_id):
     fl_ips = nova.client().floating_ips.findall(instance_id=instance_id)
     for fl_ip in fl_ips:
         nova.client().floating_ips.delete(fl_ip.id)
+
+def list_networks(**kwargs):
+    return neutron.client().list_networks(**kwargs)['networks']

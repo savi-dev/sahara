@@ -25,6 +25,7 @@ from sahara.api import v10 as api_v10
 from sahara.api import v11 as api_v11
 from sahara import context
 from sahara.middleware import auth_valid
+from sahara.middleware import catalog_present
 from sahara.middleware import log_exchange
 from sahara.openstack.common import log
 from sahara.plugins import base as plugins_base
@@ -66,6 +67,9 @@ opts = [
     cfg.StrOpt('os_admin_tenant_name',
                default='admin',
                help='Name of tenant where the user is admin.'),
+    cfg.StrOpt('os_region_name',
+               default=None,
+               help='Region name used to get services endpoints.'),
     cfg.StrOpt('infrastructure_engine',
                default='direct',
                help='An engine which will be used to provision '
@@ -130,6 +134,8 @@ def make_app():
     if CONF.debug and not CONF.log_exchange:
         LOG.debug('Logging of request/response exchange could be enabled using'
                   ' flag --log-exchange')
+
+    app.wsgi_app = catalog_present.filter_factory(app.config)(app.wsgi_app)
 
     if CONF.log_exchange:
         cfg = app.config
