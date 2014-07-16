@@ -68,6 +68,12 @@ NODE_GROUP_TEMPLATE_SCHEMA = {
         "floating_ip_pool": {
             "type": "string",
         },
+        "security_groups": {
+            "type": "array",
+            "items": {
+                "type": "string",
+            },
+        },
     },
     "additionalProperties": False,
     "required": [
